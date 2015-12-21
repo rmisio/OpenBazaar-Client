@@ -102,12 +102,15 @@ app.on('before-quit', function (e) {
 app.on('ready', function() {
 
   //var protocol = require('protocol');
-  //protocol.registerProtocol('ob', function(request) {
+  //protocol.registerBufferProtocol('ob', function(request, callback) {
   //  var url = request.url.substr(5);
   //  console.log(path.normalize(__dirname + '/' + url));
+  //  callback({mimeType: 'text/html', data: new Buffer('<h5>Response</h5>')});
   //}, function (error) {
-  //  if (error)
-  //    console.error('Failed to register protocol')
+  //  if (error) {
+  //    console.error('Failed to register protocol');
+  //    console.error(error);
+  //  }
   //});
 
   // Application Menu
@@ -156,38 +159,38 @@ app.on('ready', function() {
   ]);
   menu.setApplicationMenu(appMenu);
 
-  // Context Menu for OS X
-  if (process.platform == 'darwin') {
-    trayMenu = new tray(__dirname + '/imgs/menubar_icon.png');
-    var contextMenu = menu.buildFromTemplate([
-      {
-        label: 'Start Local Server', type: 'normal', click: function () {
-        start_local_server();
-      }
-      },
-      {
-        label: 'Shutdown Local Server', type: 'normal', click: function () {
-        request('http://localhost:18469/api/v1/shutdown', function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            console.log('Shutting down server');
-          } else {
-            console.log('Server does not seem to be running.');
-          }
-        });
-      }
-      },
-      {type: 'separator'},
-      {label: 'View Debug Log', type: 'normal'},
-      {type: 'separator'},
-      {
-        label: 'Quit', type: 'normal', accelerator: 'Command+Q', click: function () {
-        app.quit();
-      }
-      }
-    ]);
+  trayMenu = new tray(__dirname + '/imgs/menubar_icon.png');
+  var contextMenu = menu.buildFromTemplate([
+    {
+      label: 'Start Local Server', type: 'normal', click: function () {
+      start_local_server();
+    }
+    },
+    {
+      label: 'Shutdown Local Server', type: 'normal', click: function () {
+      request('http://localhost:18469/api/v1/shutdown', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          console.log('Shutting down server');
+        } else {
+          console.log('Server does not seem to be running.');
+        }
+      });
+    }
+    },
+    {type: 'separator'},
+    {label: 'View Debug Log', type: 'normal', click: function() {
+      // Open Debug Log Wherever It Is
 
-    trayMenu.setContextMenu(contextMenu);
-  }
+    }},
+    {type: 'separator'},
+    {
+      label: 'Quit', type: 'normal', accelerator: 'Command+Q', click: function () {
+      app.quit();
+    }
+    }
+  ]);
+
+  trayMenu.setContextMenu(contextMenu);
 
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -220,27 +223,39 @@ app.on('ready', function() {
     }
   });
 
+  app.on('open-url', function(event, url) {
+    mainWindow.webContents.executeJavaScript("Backbone.history.navigate('#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store', {trigger: true});");
+    event.preventDefault();
+  });
+
   app.on('activate-with-no-open-windows', function() {
     mainWindow.show();
   });
 
   autoUpdater.on("error", function(err, msg) {
     console.log(msg); //print msg , you can find the cash reason.
+    mainWindow.webContents.executeJavaScript("console.log('test: " + msg + "');");
   });
 
   autoUpdater.on("update-not-available", function(msg) {
-    console.log(msg); //print msg , you can find the cash reason.
+    mainWindow.webContents.executeJavaScript("alert('no update available');");
   });
 
   autoUpdater.on("update-available", function() {
-    mainWindow.webContents.send('ping', 'Update available!');
+    mainWindow.webContents.executeJavaScript("console.log('Update available!')");
   });
 
   autoUpdater.on("update-downloaded", function(e, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
-    mainWindow.webContents.send('ping', 'Update available!');
+    mainWindow.webContents.executeJavaScript("console.log('Update downloaded." + updateUrl + "')");
+    // Now do the stuff you need to do.
+    //if(platform == "darwin") {
+      // Unzip and replace the application
+      autoUpdater.quitAndInstall();
+    //}
   });
 
   autoUpdater.setFeedUrl('http://updates.openbazaar.org:5000/update/' + platform + '/' + version);
   autoUpdater.checkForUpdates();
+
 
 });
