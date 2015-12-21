@@ -241,6 +241,11 @@ app.on('ready', function() {
     }
   });
 
+  app.on('open-url', function(event, url) {
+    mainWindow.webContents.executeJavaScript("Backbone.history.navigate('#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store', {trigger: true});");
+    event.preventDefault();
+  });
+
   app.on('activate-with-no-open-windows', function() {
     mainWindow.show();
   });
@@ -272,6 +277,7 @@ app.on('ready', function() {
 
   autoUpdater.setFeedUrl('http://updates.openbazaar.org:5000/update/' + platform + '/' + version);
   autoUpdater.checkForUpdates();
+
 
 });
 
