@@ -26,6 +26,8 @@ var version = app.getVersion();
 var trayMenu = null;
 var subpy = null;
 
+var open_url = null; // This is for if someone opens a URL before the client is open
+
 var start_local_server = function() {
   var platform = process.platform;
 
@@ -218,6 +220,9 @@ app.on('ready', function() {
   });
 
   // and load the index.html of the app.
+  if(open_url) {
+    mainWindow.localStorage.setItem('route', open_url);
+  }
   mainWindow.loadURL('file://' + __dirname + '/index.html');
 
   // Open the devtools.
@@ -233,11 +238,6 @@ app.on('ready', function() {
     if(subpy) {
       subpy.kill('SIGHUP');
     }
-  });
-
-  app.on('open-url', function(event, url) {
-    mainWindow.webContents.executeJavaScript("Backbone.history.navigate('#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store', {trigger: true});");
-    event.preventDefault();
   });
 
   app.on('activate-with-no-open-windows', function() {
@@ -270,4 +270,14 @@ app.on('ready', function() {
   autoUpdater.checkForUpdates();
 
 
+});
+
+app.on('open-url', function(event, url) {
+  if(!mainWindow) {
+    //open_url = url;
+    open_url = "#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store";
+  } else {
+    mainWindow.localStorage.setItem("route", "#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store");
+  }
+  event.preventDefault();
 });
