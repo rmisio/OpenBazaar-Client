@@ -221,9 +221,10 @@ app.on('ready', function() {
 
   // and load the index.html of the app.
   if(open_url) {
-    mainWindow.localStorage.setItem('route', open_url);
+    mainWindow.loadURL('file://' + __dirname + '/index.html' + open_url);
+  } else {
+    mainWindow.loadURL('file://' + __dirname + '/index.html');
   }
-  mainWindow.loadURL('file://' + __dirname + '/index.html');
 
   // Open the devtools.
   mainWindow.openDevTools({detach: true});
@@ -245,16 +246,15 @@ app.on('ready', function() {
   });
 
   autoUpdater.on("error", function(err, msg) {
-    console.log(msg); //print msg , you can find the cash reason.
-    mainWindow.webContents.executeJavaScript("console.log('test: " + msg + "');");
+    mainWindow.webContents.executeJavaScript("console.log('Error with Update: " + msg + "');");
   });
 
   autoUpdater.on("update-not-available", function(msg) {
-    mainWindow.webContents.executeJavaScript("alert('no update available');");
+    // Nothing to do here
   });
 
   autoUpdater.on("update-available", function() {
-    mainWindow.webContents.executeJavaScript("console.log('Update available!')");
+    mainWindow.webContents.executeJavaScript("console.log('Update available! Downloading now...')");
   });
 
   autoUpdater.on("update-downloaded", function(e, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
@@ -269,15 +269,34 @@ app.on('ready', function() {
   autoUpdater.setFeedUrl('http://updates.openbazaar.org:5000/update/' + platform + '/' + version);
   autoUpdater.checkForUpdates();
 
-
 });
 
-app.on('open-url', function(event, url) {
-  if(!mainWindow) {
-    //open_url = url;
-    open_url = "#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store";
-  } else {
-    mainWindow.localStorage.setItem("route", "#userPage/bcda9c0fe27884309588b0392519bde7d402e669/store");
+app.on('open-url', function(event, uri) {
+
+  // uri should be in format ob:route delimited by colons
+  // eg: ob:user:GUID
+  //     ob:user:GUID:store
+  //     ob:user:GUID:item:ITEM_ID
+  var split_uri = uri.split(':');
+  if(split_uri.length > 1 && split_uri[0] == "ob") {
+    switch(split_uri[1]) {
+      case "user":
+        open_url = "#userPage/" + split_uri[2];
+        if(split_uri[3] == "store") {
+          open_url += "/store";
+        } else if(split_uri[3] == "item") {
+          open_url += "/item" + split_uri[4];
+        }
+
+        break;
+    }
   }
+  console.log(open_url);
+
+  // If application was not open store in localStorage
+  if(mainWindow) {
+    mainWindow.webContents.executeJavaScript("Backbone.history.navigate('" + open_url + "', {trigger: true});");
+  }
+
   event.preventDefault();
 });
