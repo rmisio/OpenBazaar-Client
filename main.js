@@ -15,11 +15,12 @@ var autoUpdater = require('auto-updater');
 var electron = require('electron');
 var menu = require('menu');
 var tray = require('tray');
+var ipcMain = require('ipc-main');
 
 var launched_from_installer = false;
-var platform = os.platform() + '_' + os.arch();
+var platform = os.platform();
 switch(platform) {
-  case "darwin_x64":
+  case "darwin":
     platform = "mac";
 }
 var version = app.getVersion();
@@ -29,9 +30,8 @@ var subpy = null;
 var open_url = null; // This is for if someone opens a URL before the client is open
 
 var start_local_server = function() {
-  var platform = process.platform;
 
-  if(platform == "darwin" || platform == "linux") {
+  if(platform == "mac" || platform == "linux") {
     subpy = require('child_process').spawn('./openbazaard', ['start', '--testnet', '--loglevel', 'debug'], {
       detach: true,
       cwd: __dirname + '/OpenBazaar-Server'
@@ -78,7 +78,7 @@ var mainWindow = null;
 app.on('window-all-closed', function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform != 'darwin') {
+  if (platform != 'mac') {
     app.quit();
   }
 });
@@ -156,7 +156,7 @@ app.on('ready', function() {
         {
           label: 'Toggle Developer Tools',
           accelerator: (function() {
-            if (process.platform == 'darwin') {
+            if (platform == 'mac') {
               return 'Alt+Command+I';
             } else {
               return 'Ctrl+Shift+I';
@@ -259,11 +259,15 @@ app.on('ready', function() {
 
   autoUpdater.on("update-downloaded", function(e, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
     mainWindow.webContents.executeJavaScript("console.log('Update downloaded." + updateUrl + "')");
-    // Now do the stuff you need to do.
-    //if(platform == "darwin") {
-      // Unzip and replace the application
-      autoUpdater.quitAndInstall();
-    //}
+    if(platform == "mac") {
+      mainWindow.webContents.executeJavaScript('$(".js-statusBarMessage").html("Would you like to update OpenBazaar? <span class=\\"clickable js-navInstallUpdate\\">Restart</span> to update.");');
+      mainWindow.webContents.executeJavaScript('$(".js-statusBarMessage").parent().removeClass("fadeOut");');
+    }
+  });
+
+  ipcMain.on('installUpdate', function(event) {
+    console.log('Installing Update');
+    autoUpdater.quitAndInstall();
   });
 
   autoUpdater.setFeedUrl('http://updates.openbazaar.org:5000/update/' + platform + '/' + version);
