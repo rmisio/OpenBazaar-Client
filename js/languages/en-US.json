@@ -555,7 +555,9 @@
     "handleConnect": "Connecting to ${handle}",
     "handleFail": "The page you're trying to view is currently offline",
     "userConnect": "Connecting to ${guid}",
-    "userFail": "The page you're trying to view is currently offline"
+    "userFail": "The page you're trying to view is currently offline",
+    "settingsConnect": "Loading your setttings",
+    "settingsFail": "There was an error loading your setttings"
   },
   "aboutSection": {
     "about": "<p>OpenBazaar is a network of users who buy and sell goods and services directly with each other, using Bitcoin. This network is decentralized and isn't controlled by any organization.</p><p>The software is open source and MIT licensed. You can view the code on <a href=\"https://github.com/OpenBazaar/\" target=\"_blank\">GitHub</a>.</p><p>OpenBazaar is a community project, and we welcome participation in our <a href=\"https://slack.openbazaar.org/\" target=\"_blank\">Slack</a> channel or on our <a href=\"https://www.reddit.com/r/openbazaar\" target=\"_blank\">subreddit</a>.</p><p>If you need help, read the OpenBazaar version 1.0 <a href=\"https://blog.openbazaar.org/tag/tutorial/\" target=\"_blank\">tutorial</a>.</p><p>If you still have questions, open an issue at our <a href=\"https://openbazaar.zendesk.com/hc/en-us/articles/203219995-Question-not-answered-Read-this-post\" target=\"_blank\">support desk</a>.</p>",

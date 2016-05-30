@@ -84,10 +84,8 @@ module.exports = Backbone.View.extend({
 
     this.shownMods = []; //array of mods that have been shown, used to prevent duplicates
 
-    this.moderatorFeeInput;
-    this.moderatorFeeHolder;
     this.oldFeeValue = options.userProfile.get('profile').moderation_fee || 0;
-
+    this.loadingDeferred = $.Deferred();
     this.firstLoadModerators = true;
     
     this.listenTo(window.obEventBus, 'saveCurrentForm', function(){
@@ -122,6 +120,21 @@ module.exports = Backbone.View.extend({
     this.fetchModel();
   },
 
+ loadingConfig: function() {
+    var config = {
+      promise: this.loadingDeferred.promise(),
+      cancel: () => {
+        this.userProfileFetch && this.userProfileFetch.abort();
+        this.itemFetch && this.itemFetch.abort();
+      }
+    };
+
+    config.connectText = window.polyglot.t('pageConnectingMessages.settingsConnect');
+    config.failedText = window.polyglot.t('pageConnectingMessages.settingsFail');
+
+    return config;
+  },  
+
   fetchModel: function(){
     var self = this;
     this.firstLoadModerators = true;
@@ -140,14 +153,14 @@ module.exports = Backbone.View.extend({
             getBTPrice("USD", function (btAve, currencyList) {
               self.availableCurrenciesList = currencyList;
               self.render();
-              $('.js-loadingModal').removeClass('show');
+              self.loadingDeferred.resolve();
             });
           }
         });
       },
       error: function(model, response){
         console.log(response);
-        messageModal.show(window.polyglot.t('errorMessages.getError'), window.polyglot.t('errorMessages.userError'));
+        self.loadingDeferred.reject();
       }
     });
   },
