@@ -286,6 +286,10 @@ h6, .h6 {
   overflow: hidden;
 }
 
+.noTextOverflow {
+  text-overflow: ellipsis;
+}
+
 .noWrap {
   white-space: nowrap;
 }
@@ -4273,6 +4277,15 @@ input[type="checkbox"].fieldItem:checked + label .togLabelOff {
   left: auto;
   right: 0;
   bottom: 18px;
+}
+
+.tooltip.tooltip-max350:hover:after{
+  max-width: 350px;
+  word-wrap: break-word;
+  white-space: normal;
+  height: auto;
+  transform: translateY(calc(-85%));
+  bottom: 0;  
 }
 
 .tooltip.tooltip-box:hover:after {

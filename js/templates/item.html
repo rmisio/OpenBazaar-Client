@@ -111,8 +111,9 @@
           <% _.each(ob.vendor_offer.listing.item.keywords, function(data, i) {
             if(data.length < 100 && i < 11) {
           %>
-            <a href="#home/products/<%= data.replace(/\s+/g, '')  %>">
-              <div class="btn-pill custCol-secondary floatLeft">
+            <a href="#home/products/<%= data.replace(/\s+/g, '')  %>" class="cle2arfix tooltip tooltip-leftTop tooltip-max350 inlineBlock"
+              data-tooltip="<%= data.replace(/\s+/g, '') %>">
+              <div class="btn-pill custCol-secondary floatLeft noTextOverflow" style="max-width: 95px">
                 #<%= data.replace(/\s+/g, '') %>
               </div>
             </a>
